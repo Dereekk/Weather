@@ -1,40 +1,33 @@
-self.addEventListener('install', function (event) {
-  event.waitUntil(
-    caches.open('v1').then(function(cache) {
+const version = "1";
+const cacheName = `weather-${version}`;
+self.addEventListener('install', e => {
+  const timeStamp = Date.now();
+  e.waitUntil(
+    caches.open(cacheName).then(cache => {
       return cache.addAll([
-        '/',
-        'index.html',
-        'index.js',
-        'index.css',
-        'sw.js',
-        'sw-link.js',
-        'manifest.json'
-      ]);
+        `/`,
+        `/index.html`,
+        `index.css`,
+        `index.js`,
+        `manifest.json`,
+        `sw.js`,
+        `sw-link.js`
+      ])
+          .then(() => self.skipWaiting());
     })
   );
 });
-addEventListener('fetch', function(event) {
+
+self.addEventListener('activate', event => {
+  event.waitUntil(self.clients.claim());
+});
+
+self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request)
-      .then(function(response) {
-        if (response) {
-          return response;     // if valid response is found in cache return it
-        } else {
-          return fetch(event.request)     //fetch from internet
-            .then(function(res) {
-              return caches.open(CACHE_DYNAMIC_NAME)
-                .then(function(cache) {
-                  cache.put(event.request.url, res.clone());    //save the response for future
-                  return res;   // return the fetched data
-                })
-            })
-            .catch(function(err) {       // fallback mechanism
-              return caches.open(CACHE_CONTAINING_ERROR_MESSAGES)
-                .then(function(cache) {
-                  return cache.match('/index.html');
-                });
-            });
-        }
-      })
+    caches.open(cacheName)
+      .then(cache => cache.match(event.request, {ignoreSearch: true}))
+      .then(response => {
+      return response || fetch(event.request);
+    })
   );
-});          
+});

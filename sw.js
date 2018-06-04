@@ -1,31 +1,78 @@
-const version = "1";
-const cacheName = `weather-${version}`;
-self.addEventListener('install', e => {
-  const timeStamp = Date.now();
-  e.waitUntil(
-    caches.open(cacheName).then(cache => {
-      return cache.addAll([
-        `/`,
-        `./index.html`,
-        `./index.css`,
-        `./index.js`,
-        `./manifest.json`
-      ])
-          .then(() => self.skipWaiting());
-    })
-  );
+var cacheName = 'v1';
+
+var cacheFiles = [
+	'./',
+	'index.html',
+    'index.css',
+    'index.js',
+    'manifest.json',
+    'sw.js',
+    'sw-link.js'
+];
+
+
+addEventListener('install', event => {
+    console.log('[ServiceWorker] Installed');
+
+    event.waitUntil(
+
+	    caches.open(cacheName).then(function(cache) {
+
+			console.log('[ServiceWorker] Caching cacheFiles');
+			return cache.addAll(cacheFiles);
+	    })
+	);
 });
 
-self.addEventListener('activate', event => {
-  event.waitUntil(self.clients.claim());
-});
+addEventListener('activate', event => {
+    console.log('[ServiceWorker] Activated');
 
+    event.waitUntil(async () => {
+		if (self.registration.navigationPreload) {
+			await self.registration.navigationPreload.enable();
+		}
+
+		caches.keys().then(function(cacheNames) {
+			return Promise.all(cacheNames.map(function(thisCacheName) {
+
+				if (thisCacheName !== cacheName) {
+
+					console.log('[ServiceWorker] Removing Cached Files from Cache - ', thisCacheName);
+					return caches.delete(thisCacheName);
+				}
+			}));
+		})
+	});
+
+});
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.open(cacheName)
-      .then(cache => cache.match(event.request, {ignoreSearch: true}))
-      .then(response => {
-      return response || fetch(event.request);
-    })
-  );
+	console.log('[ServiceWorker] Fetch', event.request.url);
+	event.respondWith(
+		caches.match(event.request).then(function(response) {
+			if ( response ) {
+				console.log("[ServiceWorker] Found in Cache", event.request.url, response);
+				return response;
+			}
+			var requestClone = event.request.clone();
+			fetch(requestClone).then(function(response) {
+				if ( !response ) {
+					console.log("[ServiceWorker] No response from fetch ")
+					return response;
+				}
+				var responseClone = response.clone();
+				caches.open(cacheName).then(function(cache) {
+					cache.put(event.request, responseClone);
+					console.log('[ServiceWorker] New Data Cached', event.request.url);
+					return response;
+				});
+			}).catch(function(err) {
+				console.log('[ServiceWorker] Error Fetching & Caching New Data', err);
+				});
+		})
+	);
+});//ssss
+self.addEventListener('message', function(event) {
+	if (event.data.action === 'skipWaiting') {
+		self.skipWaiting();
+	}
 });

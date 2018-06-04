@@ -6,11 +6,11 @@ self.addEventListener('install', e => {
     caches.open(cacheName).then(cache => {
       return cache.addAll([
         `/`,
-        `/index.html`,
-        `index.css`,
-        `index.js`,
-        `manifest.json`,
-        `sw-link.js`
+        `./index.html`,
+        `./index.css`,
+        `./index.js`,
+        `./manifest.json`,
+        `./sw-link.js`
       ])
           .then(() => self.skipWaiting());
     })

@@ -1,4 +1,4 @@
-var cacheName = new Date(ms);
+var cacheName = new Date(milliseconds);
 
 var cacheFiles = [
 	'./',

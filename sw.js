@@ -1,5 +1,4 @@
 var staticCacheName = '1';
-var urlsToPrefetch = 'https://api.openweathermap.org/data/2.5/weather?id=5946768&APPID=bd0b7c042d9a582253db55905fc1a01d'
 
 addEventListener('activate', event => {
   event.waitUntil( async function() {
@@ -38,10 +37,7 @@ addEventListener('install', event =>  {
     	'index.css',
     	'sw-link.js',
     	'sw.js'
-      ]),
-      cache.addAll(urlsToPrefetch.map(function(urlToPrefetch) {
-        return new Request(urlToPrefetch, { mode: 'no-cors' });
-      })).then(function() {
+      ]).then(function() {
         console.log('All resources have been fetched and cached.');
       });
     })

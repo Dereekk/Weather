@@ -1,4 +1,4 @@
-var url = "http://api.openweathermap.org/data/2.5/weather?id=5946768&APPID=bd0b7c042d9a582253db55905fc1a01d";
+var url = "https://api.openweathermap.org/data/2.5/weather?id=5946768&APPID=bd0b7c042d9a582253db55905fc1a01d";
 
 $.ajax({
     url: url,

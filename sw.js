@@ -7,7 +7,8 @@ self.addEventListener('install', function(event) {
         'index.js',
         'index.css',
         'sw.js',
-        'sw-link.js'
+        'sw-link.js',
+        'manifest.json'
       ]);
     })
   );

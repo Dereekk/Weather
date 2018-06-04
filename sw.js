@@ -10,7 +10,6 @@ self.addEventListener('install', e => {
         `index.css`,
         `index.js`,
         `manifest.json`,
-        `sw.js`,
         `sw-link.js`
       ])
           .then(() => self.skipWaiting());

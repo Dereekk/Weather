@@ -16,13 +16,13 @@ self.addEventListener("install", function(event) {
   event.waitUntil(caches.open(version + 'fundamentals').then(function(cache) {
         return cache.addAll([
             '/',
-            'index.html',
-            'index.js',
-            'index.css',
-            'manifest.json',
-            'sw.js',
-            'sw-link',
-            'images/144.png'
+            '/index.html',
+            '/index.js',
+            '/index.css',
+            '/manifest.json',
+            '/sw.js',
+            '/sw-link.js',
+            '/images/144.png'
         ]);
       }).then(function() {
         console.log('WORKER: install completed');

@@ -1,4 +1,4 @@
-var cacheName = new Date();
+var version = "v1::";
 
 var cacheFiles = [
 	'./',

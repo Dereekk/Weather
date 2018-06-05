@@ -11,68 +11,72 @@ var cacheFiles = [
 ];
 
 
-addEventListener('install', event => {
-    console.log('[ServiceWorker] Installed');
-
-    event.waitUntil(
-
-	    caches.open(cacheName).then(function(cache) {
-
-			console.log('[ServiceWorker] Caching cacheFiles');
-			return cache.addAll(cacheFiles);
-	    })
-	);
+self.addEventListener("install", function(event) {
+  console.log('WORKER: install event in progress.');
+  event.waitUntil(caches.open(version + 'fundamentals').then(function(cache) {
+        return cache.addAll([
+            '/',
+            'index.html',
+            'index.js',
+            'index.css',
+            'manifest.json',
+            'sw.js',
+            'sw-link',
+            'images/144.png'
+        ]);
+      }).then(function() {
+        console.log('WORKER: install completed');
+      })
+  );
 });
 
-addEventListener('activate', event => {
-    console.log('[ServiceWorker] Activated');
-
-    event.waitUntil(async () => {
-		if (self.registration.navigationPreload) {
-			await self.registration.navigationPreload.enable();
-		}
-
-		caches.keys().then(function(cacheNames) {
-			return Promise.all(cacheNames.map(function(thisCacheName) {
-
-				if (thisCacheName !== cacheName) {
-
-					console.log('[ServiceWorker] Removing Cached Files from Cache - ', thisCacheName);
-					return caches.delete(thisCacheName);
-				}
-			}));
-		})
-	});
-
+self.addEventListener("fetch", function(event) {
+  console.log('WORKER: fetch event in progress.');
+  if (event.request.method !== 'GET') {
+    console.log('WORKER: fetch event ignored.', event.request.method, event.request.url);
+    return;
+  }
+  event.respondWith(caches.match(event.request).then(function(cached) {
+        var networked = fetch(event.request).then(fetchedFromNetwork, unableToResolve).catch(unableToResolve);
+        console.log('WORKER: fetch event', cached ? '(cached)' : '(network)', event.request.url);
+        return cached || networked;
+        function fetchedFromNetwork(response) {
+          var cacheCopy = response.clone();
+          console.log('WORKER: fetch response from network.', event.request.url);
+          caches.open(version + 'pages').then(function add(cache) {
+              cache.put(event.request, cacheCopy);
+            }).then(function() {
+              console.log('WORKER: fetch response stored in cache.', event.request.url);
+            });
+          return response;
+        }
+        function unableToResolve () {
+          console.log('WORKER: fetch request failed in both cache and network.');
+          return new Response('<h1>Service Unavailable</h1>', {
+            status: 503,
+            statusText: 'Service Unavailable',
+            headers: new Headers({
+              'Content-Type': 'text/html'
+            })
+          });
+        }
+      })
+  );
 });
-self.addEventListener('fetch', event => {
-	console.log('[ServiceWorker] Fetch', event.request.url);
-	event.respondWith(
-		caches.match(event.request).then(function(response) {
-			if ( response ) {
-				console.log("[ServiceWorker] Found in Cache", event.request.url, response);
-				return response;
-			}
-			var requestClone = event.request.clone();
-			fetch(requestClone).then(function(response) {
-				if ( !response ) {
-					console.log("[ServiceWorker] No response from fetch ")
-					return response;
-				}
-				var responseClone = response.clone();
-				caches.open(cacheName).then(function(cache) {
-					cache.put(event.request, responseClone);
-					console.log('[ServiceWorker] New Data Cached', event.request.url);
-					return response;
-				});
-			}).catch(function(err) {
-				console.log('[ServiceWorker] Error Fetching & Caching New Data', err);
-				});
-		})
-	);
-});//ssss
-self.addEventListener('message', function(event) {
-	if (event.data.action === 'skipWaiting') {
-		self.skipWaiting();
-	}
+
+self.addEventListener("activate", function(event) {
+  console.log('WORKER: activate event in progress.');
+  event.waitUntil(
+    caches.keys().then(function (keys) {
+        return Promise.all(
+          keys.filter(function (key) {
+              return !key.startsWith(version);
+            }).map(function (key) {
+              return caches.delete(key);
+            })
+        );
+      }).then(function() {
+        console.log('WORKER: activate completed.');
+      })
+  );
 });

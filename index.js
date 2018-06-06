@@ -17,6 +17,9 @@ function weather(){
             if("name" in result){
                 $(".name").text(result.name)
             }
+            if("weather" in result){
+                $(".desc").text(result.weather["0"].description)
+            }
 
         }
     });

@@ -89,3 +89,11 @@ body {
 .button:active {
     transform: scale(0.99);
 }
+
+.desc {
+    width: 100%;
+    height: auto;
+    font-size: 20vw;
+    text-align: center;
+    font-family: 'Roboto', sans-serif;
+}

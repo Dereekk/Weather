@@ -67,6 +67,8 @@ body {
                 transform 150ms ease;
     -webkit-appearance: none;
     -moz-appearance: none;
+    height: 50%;
+    width: 50%;
     
     background: linear-gradient(238deg, #fd8800, #fd008f, #9700fd, #003dfd, #05c7e6, #4bd58d);
   background-size: 1200% 1200%;

@@ -60,7 +60,7 @@ body {
     background: #0069ed;
     color: #ffffff;
     font-family: sans-serif;
-    font-size: 1rem;
+    font-size: 10vw;
     cursor: pointer;
     text-align: center;
     transition: background 250ms ease-in-out, 

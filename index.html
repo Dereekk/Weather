@@ -9,11 +9,22 @@
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
 </head>
 <body>
-    <script src="sw-link.js"></script>
     <script src="index.js"></script>
     <div class="name"></div>
     <div class="temp"></div>
     <div class="desc"></div>
     <input class="button" type="button" value="Update" onclick="weatherButton()"/>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log(`Service Worker registed! Scope: ${registration.scope}`);
+                    }).catch(err => {
+                        console.log(`Service Worker registration failed: ${err}`);
+                    });
+            });
+        }
+    </script>
 </body>
 </html>
